@@ -30,11 +30,11 @@
             <el-icon><Tickets /></el-icon>
             <span>My Borrows</span>
           </el-menu-item>
-          <el-menu-item index="/reservations" v-if="authStore.isReader">
+          <el-menu-item v-if="authStore.isReader" index="/reservations">
             <el-icon><Calendar /></el-icon>
             <span>Reservations</span>
           </el-menu-item>
-          <el-menu-item index="/fines" v-if="authStore.isReader">
+          <el-menu-item v-if="authStore.isReader" index="/fines">
             <el-icon><Money /></el-icon>
             <span>Fines</span>
           </el-menu-item>
@@ -66,7 +66,12 @@
               </span>
               <template #dropdown>
                 <el-dropdown-menu>
-                  <el-dropdown-item @click="handleLogout">Logout</el-dropdown-item>
+                  <el-dropdown-item @click="showPasswordDialog = true">
+                    <el-icon><Lock /></el-icon> Change Password
+                  </el-dropdown-item>
+                  <el-dropdown-item divided @click="handleLogout">
+                    <el-icon><SwitchButton /></el-icon> Logout
+                  </el-dropdown-item>
                 </el-dropdown-menu>
               </template>
             </el-dropdown>
@@ -83,19 +88,92 @@
     <div v-else class="guest-layout">
       <router-view />
     </div>
+
+    <!-- Change Password Dialog -->
+    <el-dialog v-model="showPasswordDialog" title="Change Password" width="420px" :close-on-click-modal="false">
+      <el-form :model="passwordForm" :rules="passwordRules" ref="passwordFormRef" label-width="140px">
+        <el-form-item label="Current Password" prop="oldPassword">
+          <el-input v-model="passwordForm.oldPassword" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="New Password" prop="newPassword">
+          <el-input v-model="passwordForm.newPassword" type="password" show-password />
+        </el-form-item>
+        <el-form-item label="Confirm Password" prop="confirmPassword">
+          <el-input v-model="passwordForm.confirmPassword" type="password" show-password />
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showPasswordDialog = false">Cancel</el-button>
+        <el-button type="primary" :loading="changingPassword" @click="handleChangePassword">Confirm</el-button>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
+import { changePassword } from './api'
+import { ElMessage } from 'element-plus'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const currentRoute = computed(() => route.path)
+
+// Change Password
+const showPasswordDialog = ref(false)
+const changingPassword = ref(false)
+const passwordFormRef = ref(null)
+const passwordForm = reactive({
+  oldPassword: '',
+  newPassword: '',
+  confirmPassword: ''
+})
+
+const validateConfirm = (rule, value, callback) => {
+  if (value !== passwordForm.newPassword) {
+    callback(new Error('Passwords do not match'))
+  } else {
+    callback()
+  }
+}
+
+const passwordRules = {
+  oldPassword: [{ required: true, message: 'Current password is required', trigger: 'blur' }],
+  newPassword: [
+    { required: true, message: 'New password is required', trigger: 'blur' },
+    { min: 6, message: 'At least 6 characters', trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, message: 'Please confirm new password', trigger: 'blur' },
+    { validator: validateConfirm, trigger: 'blur' }
+  ]
+}
+
+async function handleChangePassword() {
+  const valid = await passwordFormRef.value.validate().catch(() => false)
+  if (!valid) return
+
+  changingPassword.value = true
+  try {
+    await changePassword({
+      oldPassword: passwordForm.oldPassword,
+      newPassword: passwordForm.newPassword
+    })
+    ElMessage.success('Password changed successfully')
+    showPasswordDialog.value = false
+    passwordForm.oldPassword = ''
+    passwordForm.newPassword = ''
+    passwordForm.confirmPassword = ''
+  } catch (e) {
+    // Error handled by interceptor
+  } finally {
+    changingPassword.value = false
+  }
+}
 
 function handleLogout() {
   authStore.logout()

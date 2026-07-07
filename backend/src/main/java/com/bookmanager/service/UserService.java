@@ -50,6 +50,29 @@ public class UserService {
                 .orElseThrow(() -> new BusinessException("User not found"));
     }
 
+    /**
+     * Returns Optional to avoid user-enumeration leaks during login.
+     */
+    public java.util.Optional<User> findByUsernameOptional(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Transactional
+    public void changePassword(Long userId, String oldPassword, String newPassword) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new BusinessException("User not found"));
+
+        if (!passwordEncoder.matches(oldPassword, user.getPasswordHash())) {
+            throw new BusinessException("Current password is incorrect");
+        }
+        if (newPassword.length() < 6) {
+            throw new BusinessException("New password must be at least 6 characters");
+        }
+
+        user.setPasswordHash(passwordEncoder.encode(newPassword));
+        userRepository.save(user);
+    }
+
     public List<User> listAllUsers() {
         return userRepository.findAll();
     }

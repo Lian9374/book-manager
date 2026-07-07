@@ -3,6 +3,8 @@ import http from '../utils/axios'
 // Auth
 export const login = (data) => http.post('/auth/login', data)
 export const register = (data) => http.post('/auth/register', data)
+export const refreshToken = (data) => http.post('/auth/refresh', data)
+export const changePassword = (data) => http.post('/auth/change-password', data)
 
 // Books
 export const getBooks = (params) => http.get('/books', { params })

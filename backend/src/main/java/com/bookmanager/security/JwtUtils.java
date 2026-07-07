@@ -60,6 +60,10 @@ public class JwtUtils {
         return parseClaims(token).get("roles", List.class);
     }
 
+    public String getTokenType(String token) {
+        return parseClaims(token).get("type", String.class);
+    }
+
     public boolean validateToken(String token) {
         try {
             parseClaims(token);
