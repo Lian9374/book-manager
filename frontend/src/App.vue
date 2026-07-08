@@ -42,6 +42,10 @@
             <el-icon><DataAnalysis /></el-icon>
             <span>Statistics</span>
           </el-menu-item>
+          <el-menu-item v-if="authStore.isAdmin" index="/categories">
+            <el-icon><FolderOpened /></el-icon>
+            <span>Categories</span>
+          </el-menu-item>
           <el-menu-item v-if="authStore.isAdmin" index="/users">
             <el-icon><UserFilled /></el-icon>
             <span>User Management</span>

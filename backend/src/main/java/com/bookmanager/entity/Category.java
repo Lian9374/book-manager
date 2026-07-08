@@ -1,5 +1,7 @@
 package com.bookmanager.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -12,6 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Category {
 
     @Id
@@ -23,6 +26,7 @@ public class Category {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "parent_id")
+    @JsonIgnore  // Prevent infinite recursion during JSON serialization
     private Category parent;
 
     @OneToMany(mappedBy = "parent", fetch = FetchType.LAZY)

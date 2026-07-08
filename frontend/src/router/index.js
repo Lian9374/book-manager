@@ -38,6 +38,12 @@ const routes = [
     meta: { requiresAuth: true }
   },
   {
+    path: '/categories',
+    name: 'Categories',
+    component: () => import('../views/books/CategoryManagement.vue'),
+    meta: { requiresAuth: true, roles: ['ADMIN'] }
+  },
+  {
     path: '/borrows',
     name: 'Borrows',
     component: () => import('../views/borrow/BorrowList.vue'),

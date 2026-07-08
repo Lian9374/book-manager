@@ -39,6 +39,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/books/**").hasAnyRole("LIBRARIAN", "ADMIN")
                 // Category write operations require ADMIN
                 .requestMatchers(HttpMethod.POST, "/api/categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/categories/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
                 // Borrow operations
                 .requestMatchers(HttpMethod.POST, "/api/borrows").hasRole("READER")
                 .requestMatchers("/api/borrows/*/return").hasAnyRole("LIBRARIAN", "ADMIN")

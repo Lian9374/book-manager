@@ -11,11 +11,15 @@ export const getBooks = (params) => http.get('/books', { params })
 export const getBook = (id) => http.get(`/books/${id}`)
 export const addBook = (data) => http.post('/books', data)
 export const updateBook = (id, data) => http.put(`/books/${id}`, data)
+export const deleteBook = (id) => http.delete(`/books/${id}`)
 export const getInventoryLogs = (id) => http.get(`/books/${id}/inventory-logs`)
 
 // Categories
 export const getCategories = () => http.get('/categories')
+export const getCategoryTree = () => http.get('/categories/tree')
 export const createCategory = (data) => http.post('/categories', data)
+export const updateCategory = (id, data) => http.put(`/categories/${id}`, data)
+export const deleteCategory = (id) => http.delete(`/categories/${id}`)
 
 // Borrow
 export const borrowBook = (data) => http.post('/borrows', data)
