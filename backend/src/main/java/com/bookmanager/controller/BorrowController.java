@@ -26,7 +26,7 @@ public class BorrowController {
     private final BorrowRecordRepository borrowRecordRepository;
 
     @PostMapping
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<BorrowRecord> borrowBook(@Valid @RequestBody BorrowRequest request,
                                                   @AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success("Book borrowed successfully", borrowService.borrowBook(request, principal));
@@ -40,7 +40,7 @@ public class BorrowController {
     }
 
     @PutMapping("/{id}/renew")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<BorrowRecord> renewBook(@PathVariable Long id,
                                                 @AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success("Book renewed successfully", borrowService.renewBook(id, principal));
@@ -66,13 +66,13 @@ public class BorrowController {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<List<BorrowRecord>> myBorrows(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(borrowRecordRepository.findByUserIdOrderByBorrowDateDesc(principal.getUserId()));
     }
 
     @GetMapping("/my/active-count")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<Map<String, Long>> myActiveBorrowCount(@AuthenticationPrincipal UserPrincipal principal) {
         long count = borrowRecordRepository.countByUserIdAndStatusIn(
                 principal.getUserId(),

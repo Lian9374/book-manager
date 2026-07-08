@@ -24,13 +24,13 @@ public class FineController {
     // ── Reader endpoints ──
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<List<Fine>> myFines(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(fineService.getMyFines(principal.getUserId()));
     }
 
     @GetMapping("/my/unpaid")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<Map<String, BigDecimal>> myUnpaidAmount(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(Map.of("unpaidAmount", fineService.getUnpaidAmount(principal.getUserId())));
     }

@@ -25,14 +25,14 @@ public class ReservationController {
     private final ReservationRepository reservationRepository;
 
     @PostMapping
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<Reservation> reserveBook(@Valid @RequestBody ReservationRequest request,
                                                   @AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success("Reservation created", reservationService.reserveBook(request, principal));
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<Void> cancelReservation(@PathVariable Long id,
                                                 @AuthenticationPrincipal UserPrincipal principal) {
         reservationService.cancelReservation(id, principal);
@@ -51,13 +51,13 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<List<Reservation>> myReservations(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(reservationService.getMyReservations(principal.getUserId()));
     }
 
     @GetMapping("/queue-position")
-    @PreAuthorize("hasRole('READER')")
+    @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
     public ApiResponse<Map<String, Object>> queuePosition(@RequestParam Long bookId,
                                                            @AuthenticationPrincipal UserPrincipal principal) {
         long position = reservationService.getQueuePosition(bookId, principal.getUserId());
