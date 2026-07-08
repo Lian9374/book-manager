@@ -30,11 +30,11 @@
             <el-icon><Tickets /></el-icon>
             <span>My Borrows</span>
           </el-menu-item>
-          <el-menu-item v-if="authStore.isReader" index="/reservations">
+          <el-menu-item index="/reservations">
             <el-icon><Calendar /></el-icon>
             <span>Reservations</span>
           </el-menu-item>
-          <el-menu-item v-if="authStore.isReader" index="/fines">
+          <el-menu-item index="/fines">
             <el-icon><Money /></el-icon>
             <span>Fines</span>
           </el-menu-item>

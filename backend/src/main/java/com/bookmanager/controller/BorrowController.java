@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,6 +60,7 @@ public class BorrowController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public ApiResponse<List<BorrowRecord>> listAllBorrows(
             @RequestParam(required = false) BorrowStatus status,
             @RequestParam(required = false) Long userId) {
@@ -67,6 +69,7 @@ public class BorrowController {
 
     @GetMapping("/my")
     @PreAuthorize("hasAnyRole('READER', 'LIBRARIAN', 'ADMIN')")
+    @Transactional(readOnly = true)
     public ApiResponse<List<BorrowRecord>> myBorrows(@AuthenticationPrincipal UserPrincipal principal) {
         return ApiResponse.success(borrowRecordRepository.findByUserIdOrderByBorrowDateDesc(principal.getUserId()));
     }

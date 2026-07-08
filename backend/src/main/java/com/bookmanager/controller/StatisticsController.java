@@ -14,7 +14,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/statistics")
 @RequiredArgsConstructor
-@PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
 public class StatisticsController {
 
     private final StatisticsService statisticsService;
