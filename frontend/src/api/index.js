@@ -33,8 +33,10 @@ export const getActiveBorrowCount = () => http.get('/borrows/my/active-count')
 // Reservations
 export const reserveBook = (data) => http.post('/reservations', data)
 export const cancelReservation = (id) => http.delete(`/reservations/${id}`)
-export const getAllReservations = () => http.get('/reservations')
+export const getAllReservations = (params) => http.get('/reservations', { params })
 export const getMyReservations = () => http.get('/reservations/my')
+export const getQueuePosition = (bookId) => http.get('/reservations/queue-position', { params: { bookId } })
+export const getReservationCount = (bookId) => http.get(`/reservations/book/${bookId}/count`)
 
 // Fines
 export const getMyFines = () => http.get('/fines/my')

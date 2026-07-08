@@ -75,9 +75,41 @@ public class ReservationService {
 
         reservation.setStatus(ReservationStatus.CANCELLED);
         reservationRepository.save(reservation);
+
+        // If no more pending reservations for this book, revert book status
+        long pendingCount = reservationRepository.countByBookIdAndStatus(
+                reservation.getBook().getId(), ReservationStatus.PENDING);
+        if (pendingCount == 0) {
+            Book book = reservation.getBook();
+            if (book.getStatus() == BookStatus.RESERVED) {
+                book.setStatus(BookStatus.BORROWED);
+                bookRepository.save(book);
+            }
+        }
     }
 
     public List<Reservation> getMyReservations(Long userId) {
         return reservationRepository.findByUserIdOrderByReserveDateDesc(userId);
+    }
+
+    /**
+     * Get user's position in the reservation queue for a specific book.
+     * Returns 0 if not in queue.
+     */
+    public long getQueuePosition(Long bookId, Long userId) {
+        List<Reservation> queue = reservationRepository.findPendingReservationsByBook(bookId);
+        for (int i = 0; i < queue.size(); i++) {
+            if (queue.get(i).getUser().getId().equals(userId)) {
+                return i + 1; // 1-indexed
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Get total pending reservation count for a book.
+     */
+    public long getReservationCount(Long bookId) {
+        return reservationRepository.countByBookIdAndStatus(bookId, ReservationStatus.PENDING);
     }
 }

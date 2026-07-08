@@ -24,4 +24,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT r FROM Reservation r WHERE r.book.id = :bookId AND r.status = 'PENDING' ORDER BY r.reserveDate ASC")
     List<Reservation> findPendingReservationsByBook(@Param("bookId") Long bookId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = :status AND r.fulfillDeadline IS NOT NULL AND r.fulfillDeadline < :date")
+    List<Reservation> findByStatusAndFulfillDeadlineBefore(
+            @Param("status") ReservationStatus status,
+            @Param("date") LocalDate date);
 }

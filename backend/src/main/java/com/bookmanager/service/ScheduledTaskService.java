@@ -1,6 +1,7 @@
 package com.bookmanager.service;
 
 import com.bookmanager.entity.*;
+import com.bookmanager.enums.BookStatus;
 import com.bookmanager.enums.BorrowStatus;
 import com.bookmanager.enums.ReservationStatus;
 import com.bookmanager.repository.*;
@@ -24,6 +25,7 @@ public class ScheduledTaskService {
     private final ReservationRepository reservationRepository;
     private final FineRepository fineRepository;
     private final NotificationRepository notificationRepository;
+    private final BookRepository bookRepository;
     private final SystemConfigService configService;
 
     /**
@@ -45,7 +47,6 @@ public class ScheduledTaskService {
             BigDecimal finePerDay = configService.getOverdueFinePerDay();
             BigDecimal amount = finePerDay.multiply(BigDecimal.valueOf(overdueDays));
 
-            // Check if fine already exists for this record (to avoid duplicates)
             if (!fineRepository.existsByBorrowRecordId(record.getId())) {
                 fineRepository.save(Fine.builder()
                         .user(record.getUser())
@@ -68,26 +69,54 @@ public class ScheduledTaskService {
 
     /**
      * Daily check for expired reservations: runs at 3:00 AM
+     * Handles both wait-expiration and fulfillment-deadline expiration.
      */
     @Scheduled(cron = "0 0 3 * * ?")
     @Transactional
     public void checkExpiredReservations() {
         log.info("Running reservation expiration check...");
         LocalDate today = LocalDate.now();
-        List<Reservation> expiredReservations = reservationRepository
-                .findExpiredReservations(today);
 
-        for (Reservation reservation : expiredReservations) {
-            reservation.setStatus(ReservationStatus.EXPIRED);
-            reservationRepository.save(reservation);
-
-            notificationRepository.save(Notification.builder()
-                    .user(reservation.getUser())
-                    .title("Reservation Expired")
-                    .content("Your reservation for '" + reservation.getBook().getTitle() + "' has expired.")
-                    .type("SYSTEM")
-                    .build());
+        // 1. Expire reservations past their wait-expiry date
+        List<Reservation> expiredByDate = reservationRepository.findExpiredReservations(today);
+        for (Reservation reservation : expiredByDate) {
+            expireReservation(reservation, "Your reservation for '" + reservation.getBook().getTitle() + "' has expired.");
         }
-        log.info("Reservation expiration check complete. {} expired.", expiredReservations.size());
+
+        // 2. Expire reservations past their fulfillment deadline (book was available but user didn't borrow)
+        List<Reservation> expiredFulfillment = reservationRepository
+                .findByStatusAndFulfillDeadlineBefore(ReservationStatus.PENDING, today);
+        for (Reservation reservation : expiredFulfillment) {
+            if (reservation.getFulfillDeadline() != null) {
+                expireReservation(reservation, "You did not borrow '" + reservation.getBook().getTitle()
+                        + "' by the deadline. Reservation released.");
+            }
+        }
+
+        log.info("Reservation expiration complete. {} expired by date, {} by fulfillment deadline.",
+                expiredByDate.size(), expiredFulfillment.size());
+    }
+
+    private void expireReservation(Reservation reservation, String message) {
+        reservation.setStatus(ReservationStatus.EXPIRED);
+        reservationRepository.save(reservation);
+
+        notificationRepository.save(Notification.builder()
+                .user(reservation.getUser())
+                .title("Reservation Expired")
+                .content(message)
+                .type("SYSTEM")
+                .build());
+
+        // Revert book status if no more pending reservations
+        long pendingCount = reservationRepository.countByBookIdAndStatus(
+                reservation.getBook().getId(), ReservationStatus.PENDING);
+        if (pendingCount == 0) {
+            Book book = reservation.getBook();
+            if (book.getStatus() == BookStatus.RESERVED) {
+                book.setStatus(BookStatus.BORROWED);
+                bookRepository.save(book);
+            }
+        }
     }
 }
