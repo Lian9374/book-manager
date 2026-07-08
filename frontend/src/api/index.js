@@ -53,8 +53,13 @@ export const toggleUserStatus = (id) => http.put(`/users/${id}/toggle-status`)
 
 // Statistics
 export const getDashboard = () => http.get('/statistics/dashboard')
-export const getBorrowTrend = (days) => http.get('/statistics/borrow-trend', { params: { days } })
+export const getBorrowTrend = (params) => http.get('/statistics/borrow-trend', { params })
+export const getReturnTrend = (start, end) => http.get('/statistics/return-trend', { params: { start, end } })
+export const getMonthlyComparison = () => http.get('/statistics/monthly-comparison')
+export const getCategoryDistribution = () => http.get('/statistics/category-distribution')
+export const getBookStatusDistribution = () => http.get('/statistics/book-status-distribution')
 export const getPopularBooks = (limit) => http.get('/statistics/popular-books', { params: { limit } })
+export const getTopReaders = (limit) => http.get('/statistics/top-readers', { params: { limit } })
 export const getOverdueReport = () => http.get('/statistics/overdue-report')
 
 // Config (admin)

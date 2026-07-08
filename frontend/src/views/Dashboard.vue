@@ -2,7 +2,7 @@
   <div>
     <h3 style="margin-bottom:20px">Dashboard</h3>
     <el-row :gutter="20">
-      <el-col :span="6" v-for="stat in stats" :key="stat.label">
+      <el-col :span="4" v-for="stat in stats" :key="stat.label">
         <el-card shadow="hover">
           <div class="stat-card">
             <div class="stat-value">{{ stat.value }}</div>
@@ -62,13 +62,15 @@ onMounted(async () => {
       { label: 'Total Books', value: d.totalBooks },
       { label: 'Available', value: d.availableBooks },
       { label: 'Active Borrows', value: d.activeBorrows },
-      { label: 'Total Users', value: d.totalUsers }
+      { label: 'Overdue', value: d.overdueCount },
+      { label: 'Reservations', value: d.pendingReservations },
+      { label: 'Users', value: d.totalUsers }
     ]
   } catch (e) { /* dashboard not critical */ }
 
   if (isLibrarianOrAdmin.value) {
     try {
-      const trend = await getBorrowTrend(7)
+      const trend = await getBorrowTrend({ days: 7 })
       const days = Object.keys(trend.data)
       const counts = Object.values(trend.data)
       trendOption.value = {
