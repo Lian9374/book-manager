@@ -30,6 +30,10 @@ public class BorrowService {
     private final NotificationRepository notificationRepository;
     private final SystemConfigService configService;
 
+    public int getMaxBorrowCount() {
+        return configService.getMaxBorrowCount();
+    }
+
     @Transactional
     public BorrowRecord borrowBook(BorrowRequest request, UserPrincipal principal) {
         Long userId = principal.getUserId();

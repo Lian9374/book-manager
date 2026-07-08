@@ -25,8 +25,10 @@ export const deleteCategory = (id) => http.delete(`/categories/${id}`)
 export const borrowBook = (data) => http.post('/borrows', data)
 export const returnBook = (id) => http.put(`/borrows/${id}/return`)
 export const renewBook = (id) => http.put(`/borrows/${id}/renew`)
-export const getAllBorrows = () => http.get('/borrows')
+export const reportLostBook = (id) => http.put(`/borrows/${id}/report-lost`)
+export const getAllBorrows = (params) => http.get('/borrows', { params })
 export const getMyBorrows = () => http.get('/borrows/my')
+export const getActiveBorrowCount = () => http.get('/borrows/my/active-count')
 
 // Reservations
 export const reserveBook = (data) => http.post('/reservations', data)

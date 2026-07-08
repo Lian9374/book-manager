@@ -34,4 +34,18 @@ public interface BorrowRecordRepository extends JpaRepository<BorrowRecord, Long
 
     @Query("SELECT COUNT(br) FROM BorrowRecord br WHERE br.borrowDate BETWEEN :start AND :end")
     long countByBorrowDateBetween(@Param("start") LocalDate start, @Param("end") LocalDate end);
+
+    @Query("SELECT br FROM BorrowRecord br WHERE " +
+           "(:status IS NULL OR br.status = :status) AND " +
+           "(:userId IS NULL OR br.user.id = :userId) " +
+           "ORDER BY br.borrowDate DESC")
+    List<BorrowRecord> searchBorrows(@Param("status") BorrowStatus status,
+                                     @Param("userId") Long userId);
+
+    @Query("SELECT CASE WHEN COUNT(br) > 0 THEN true ELSE false END FROM BorrowRecord br " +
+           "WHERE br.book.id = :bookId AND br.user.id = :userId AND br.status = 'BORROWING'")
+    boolean hasActiveBorrow(@Param("userId") Long userId, @Param("bookId") Long bookId);
+
+    @Query("SELECT br FROM BorrowRecord br WHERE br.book.id = :bookId AND br.status IN ('BORROWING', 'RENEWED', 'OVERDUE')")
+    List<BorrowRecord> findActiveBorrowsByBook(@Param("bookId") Long bookId);
 }

@@ -43,7 +43,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.DELETE, "/api/categories/**").hasRole("ADMIN")
                 // Borrow operations
                 .requestMatchers(HttpMethod.POST, "/api/borrows").hasRole("READER")
-                .requestMatchers("/api/borrows/*/return").hasAnyRole("LIBRARIAN", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/borrows/*/return").hasAnyRole("LIBRARIAN", "ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/api/borrows/*/renew").hasRole("READER")
+                .requestMatchers(HttpMethod.PUT, "/api/borrows/*/report-lost").hasAnyRole("LIBRARIAN", "ADMIN")
                 // Reservations
                 .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("READER")
                 // Fines management
