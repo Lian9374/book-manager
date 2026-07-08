@@ -60,6 +60,9 @@
       <el-container>
         <el-header class="header">
           <div class="header-right">
+            <el-badge :value="unreadCount" :hidden="unreadCount === 0" :max="99" class="notif-badge">
+              <el-button circle :icon="Bell" @click="$router.push('/notifications')" />
+            </el-badge>
             <el-dropdown>
               <span class="user-info">
                 <el-icon><User /></el-icon>
@@ -115,17 +118,39 @@
 </template>
 
 <script setup>
-import { computed, ref, reactive } from 'vue'
+import { computed, ref, reactive, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAuthStore } from './store/auth'
 import { changePassword } from './api'
 import { ElMessage } from 'element-plus'
+import { Bell } from '@element-plus/icons-vue'
+import http from './utils/axios'
 
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
 const currentRoute = computed(() => route.path)
+const unreadCount = ref(0)
+let pollTimer = null
+
+onMounted(() => {
+  if (authStore.isLoggedIn) {
+    fetchUnreadCount()
+    pollTimer = setInterval(fetchUnreadCount, 30000) // poll every 30s
+  }
+})
+
+onUnmounted(() => {
+  if (pollTimer) clearInterval(pollTimer)
+})
+
+async function fetchUnreadCount() {
+  try {
+    const res = await http.get('/notifications/unread-count')
+    unreadCount.value = res.data.unreadCount || 0
+  } catch (e) { /* ignore */ }
+}
 
 // Change Password
 const showPasswordDialog = ref(false)

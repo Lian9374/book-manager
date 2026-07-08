@@ -79,6 +79,14 @@ public class BookController {
         return ApiResponse.success("Book deleted", null);
     }
 
+    @PutMapping("/books/{id}/report-damage")
+    public ApiResponse<Void> reportDamage(@PathVariable Long id,
+                                           @RequestParam(defaultValue = "Book damaged") String remark,
+                                           @AuthenticationPrincipal UserPrincipal principal) {
+        bookService.updateBookStatus(id, BookStatus.DAMAGED, remark, principal);
+        return ApiResponse.success("Book marked as damaged", null);
+    }
+
     @GetMapping("/books/{id}/inventory-logs")
     public ApiResponse<List<InventoryLog>> getInventoryLogs(@PathVariable Long id) {
         return ApiResponse.success(inventoryLogRepository.findByBookIdOrderByCreatedAtDesc(id));

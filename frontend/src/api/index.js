@@ -65,3 +65,12 @@ export const getOverdueReport = () => http.get('/statistics/overdue-report')
 // Config (admin)
 export const getConfigs = () => http.get('/config')
 export const updateConfigs = (data) => http.put('/config', data)
+
+// Notifications
+export const getNotifications = () => http.get('/notifications')
+export const getUnreadCount = () => http.get('/notifications/unread-count')
+export const markNotificationRead = (id) => http.put(`/notifications/${id}/read`)
+export const markAllNotificationsRead = () => http.put('/notifications/read-all')
+
+// Health
+export const healthCheck = () => http.get('/health')

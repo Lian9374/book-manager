@@ -84,6 +84,12 @@ const routes = [
     name: 'Config',
     component: () => import('../views/config/ConfigView.vue'),
     meta: { requiresAuth: true, roles: ['ADMIN'] }
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: () => import('../views/NotificationList.vue'),
+    meta: { requiresAuth: true }
   }
 ]
 
