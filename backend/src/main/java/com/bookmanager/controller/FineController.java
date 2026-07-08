@@ -2,6 +2,7 @@ package com.bookmanager.controller;
 
 import com.bookmanager.dto.ApiResponse;
 import com.bookmanager.entity.Fine;
+import com.bookmanager.enums.FineStatus;
 import com.bookmanager.security.UserPrincipal;
 import com.bookmanager.service.FineService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +21,8 @@ public class FineController {
 
     private final FineService fineService;
 
+    // ── Reader endpoints ──
+
     @GetMapping("/my")
     @PreAuthorize("hasRole('READER')")
     public ApiResponse<List<Fine>> myFines(@AuthenticationPrincipal UserPrincipal principal) {
@@ -32,9 +35,38 @@ public class FineController {
         return ApiResponse.success(Map.of("unpaidAmount", fineService.getUnpaidAmount(principal.getUserId())));
     }
 
+    // ── Admin/Librarian endpoints ──
+
+    @GetMapping
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ApiResponse<List<Fine>> listAllFines(
+            @RequestParam(required = false) FineStatus status,
+            @RequestParam(required = false) Long userId) {
+        return ApiResponse.success(fineService.getAllFines(status, userId));
+    }
+
     @PutMapping("/{id}/pay")
     @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
     public ApiResponse<Fine> payFine(@PathVariable Long id) {
         return ApiResponse.success("Fine paid", fineService.payFine(id));
+    }
+
+    @PutMapping("/{id}/waive")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<Fine> waiveFine(@PathVariable Long id) {
+        return ApiResponse.success("Fine waived", fineService.waiveFine(id));
+    }
+
+    @PostMapping("/pay-all")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ApiResponse<Void> payAllFines(@RequestBody Map<String, Long> body) {
+        fineService.payAllFines(body.get("userId"));
+        return ApiResponse.success("All fines paid", null);
+    }
+
+    @GetMapping("/stats")
+    @PreAuthorize("hasAnyRole('LIBRARIAN', 'ADMIN')")
+    public ApiResponse<Map<String, Object>> fineStats() {
+        return ApiResponse.success(fineService.getFineStats());
     }
 }

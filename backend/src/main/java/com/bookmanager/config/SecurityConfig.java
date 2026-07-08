@@ -50,6 +50,9 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/api/reservations").hasRole("READER")
                 // Fines management
                 .requestMatchers("/api/fines/*/pay").hasAnyRole("LIBRARIAN", "ADMIN")
+                .requestMatchers("/api/fines/*/waive").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.POST, "/api/fines/pay-all").hasAnyRole("LIBRARIAN", "ADMIN")
+                .requestMatchers(HttpMethod.GET, "/api/fines/stats").hasAnyRole("LIBRARIAN", "ADMIN")
                 // User management
                 .requestMatchers("/api/users/**").hasRole("ADMIN")
                 // Statistics

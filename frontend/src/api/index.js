@@ -42,6 +42,9 @@ export const getReservationCount = (bookId) => http.get(`/reservations/book/${bo
 export const getMyFines = () => http.get('/fines/my')
 export const getUnpaidAmount = () => http.get('/fines/my/unpaid')
 export const payFine = (id) => http.put(`/fines/${id}/pay`)
+export const waiveFine = (id) => http.put(`/fines/${id}/waive`)
+export const getAllFines = (params) => http.get('/fines', { params })
+export const getFineStats = () => http.get('/fines/stats')
 
 // Users (admin)
 export const getUsers = () => http.get('/users')
